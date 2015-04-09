@@ -1,0 +1,16 @@
+{
+  "name": "CrowdLauncher",
+  "version": "0.0.0",
+  "description": "HumanComputation Conference 2015",
+  "author": "Pavel Kucherbaev <pavel@kucherbaev.com>",
+  "dependencies": {
+    "body-parser": "^1.8.1",
+    "debug": "^0.8.1",
+    "express": "^4.9.5",
+    "lodash": "^2.4.1",
+    "requestify": "0.1.17"
+  },
+  "scripts": {
+    "start": "node app.js"
+  }
+}
