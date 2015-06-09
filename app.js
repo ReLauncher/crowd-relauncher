@@ -11,6 +11,7 @@ var opbeat = require('opbeat')({
 
 var logger = require('./logger');
 app.use(logger);
+
 //CORS middleware
 var allowCrossDomain = function(req, res, next) {
     res.header('Access-Control-Allow-Origin', 'http://localhost');
