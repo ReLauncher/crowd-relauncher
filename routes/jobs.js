@@ -125,17 +125,16 @@ router.route('/:id/launch')
             'iteration': 0
         }
 
-
         console.log('get info');
         getJobInfo(Launcher, function() {
-            //console.log('launch the job');
-            //launchJob(Launcher, function(Launcher) {
-            console.log('start timer');
-            periodicCheck(Launcher);
-            Launcher['timer'] = setInterval(function() {
+            console.log('launch the job');
+            launchJob(Launcher, function(Launcher) {
+                console.log('start timer');
                 periodicCheck(Launcher);
-            }, Launcher.interval);
-            //});
+                Launcher['timer'] = setInterval(function() {
+                    periodicCheck(Launcher);
+                }, Launcher.interval);
+            });
         });
 
 
