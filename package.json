@@ -8,7 +8,9 @@
     "debug": "^0.8.1",
     "express": "^4.9.5",
     "lodash": "^2.4.1",
-    "requestify": "0.1.17"
+    "requestify": "0.1.17",
+    "mongodb": "2.0.33",
+    "request":"2.42.0"
   },
   "scripts": {
     "start": "node app.js"
