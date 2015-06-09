@@ -1,16 +1,29 @@
 var express = require('express');
 var requestify = require('requestify');
+var exec = require('child_process').exec;
 var router = express.Router();
 var _ = require('lodash');
+var fs = require('fs');
+
+var MongoClient = require('mongodb').MongoClient,
+    assert = require('assert');
+
 
 var bodyParser = require('body-parser');
 
 var CrowdFlower = {
     base: 'https://api.crowdflower.com/',
     version: 'v1/',
-    getEndpoint: function(api_key, resource) {
-
-        return CrowdFlower.base + CrowdFlower.version + resource + '.json' + '?key=' + api_key
+    getEndpoint: function(api_key, resource, format, ext) {
+        if (!format) {
+            format = '.json'
+        }
+        if (!ext) {
+            ext = ''
+        }
+        var url = CrowdFlower.base + CrowdFlower.version + resource + format + '?key=' + api_key + ext
+        console.log(url)
+        return url
     }
 }
 
@@ -67,6 +80,35 @@ router.route('/:id/order')
                 response.json(job);
             });
     });
+
+router.route('/:id/predict')
+    .post(parseUrlencoded, function(request, response) {
+
+        var job_id = request.params.id;
+        var api_key = request.body.api_key;
+
+        var Launcher = {
+            'api_key': request.body.api_key,
+            'job_id': request.params.id,
+            'interval': 1 * 60 * 1000,
+            'duration_limit': 10 * 60 * 1000,
+            'iteration': 0
+        };
+        //generateResultsJob(Launcher, function() {
+        var units_amount = 50;
+        var child = exec('Rscript R/predictLastDuration.R ' + Launcher.job_id + ' ' + Launcher.api_key + ' ' + 100, function(error, stdout, stderr) {
+
+            console.log('stdout: ' + stdout);
+            console.log('stderr: ' + stderr);
+
+            if (error !== null) {
+                console.log('exec error: ' + error);
+            }
+            response.json('check logs');
+
+        });
+        //});
+    });
 // =====================================================
 // Launch a job with re-assignment
 // =====================================================
@@ -79,7 +121,7 @@ router.route('/:id/launch')
             'api_key': request.body.api_key,
             'job_id': request.params.id,
             'interval': 1 * 60 * 1000,
-            'duration_limit': 5 * 60 * 1000,
+            'duration_limit': 10 * 60 * 1000,
             'iteration': 0
         }
 
@@ -88,133 +130,45 @@ router.route('/:id/launch')
         getJobInfo(Launcher, function() {
             //console.log('launch the job');
             //launchJob(Launcher, function(Launcher) {
-                console.log('start timer');
-                Launcher['timer'] = setInterval(function() {
-                    periodicCheck(Launcher);
-                }, Launcher.interval);
+            console.log('start timer');
+            periodicCheck(Launcher);
+            Launcher['timer'] = setInterval(function() {
+                periodicCheck(Launcher);
+            }, Launcher.interval);
             //});
         });
+
+
 
         function periodicCheck(Launcher) {
             Launcher.iteration++;
             console.log('iteration ' + Launcher.iteration)
-            getJobInfo(Launcher, function() {
+            getJobInfo(Launcher, function(Launcher) {
                 if (Launcher.job_info.state != 'running') {
                     console.log('Timer is stopped, because the job state is ' + Launcher.job_info.state);
                     clearInterval(Launcher.timer);
                 }
                 console.log('job info collected')
-                getUnits(Launcher, function() {
+                getUnits(Launcher, function(Launcher) {
                     console.log('units list collected');
-                    console.log(Launcher.units);
-
-                    for (var unit_id in Launcher.units) {
-                        console.log('unit details for ' + unit_id);
-                        getUnitDetail(Launcher, unit_id, function(unit_info) {
-                            console.log(unit_info);
-                            console.log(unit_info.state);
-                            console.log(unit_info.results.judgments.length);
-                            console.log(unit_info.data.crowdlauncher);
-                            // check how long the unit is in judging mode. Re-assign if necessary
-                            if (unit_info.state == "judging") {
-                                console.log(unit_info);
-                                if (needReassignment(unit_info, Launcher.duration_limit)) {
-
-                                    newUnit(Launcher, unit_info.data, function(new_unit_info) {
-                                        console.log('update new unit - to judgable');
-
-                                        updateUnit(Launcher, new_unit_info.id, {
-                                            "state": "judgable"
-                                        });
-                                        // Link new Unit to old Unit
-                                        var new_data = new_unit_info.data;
-                                        new_data['crowdlauncher'] = {
-                                            "parent_id": unit_info.id,
-                                            "status": "NF"
-                                        }
-                                        updateUnit(Launcher, new_unit_info.id, {
-                                            "data": new_data
-                                        });
-                                        // Link old Unit to new Unit
-                                        var old_data = unit_info.data;
-                                        if (old_data['crowdlauncher']) {
-                                            if (old_data['crowdlauncher']['parent_id']) {
-                                                old_data['crowdlauncher']['child_id'] = new_unit_info.id;
-                                            }
-                                        } else {
-                                            old_data['crowdlauncher'] = {
-                                                "child_id": new_unit_info.id,
-                                                "status": "NF"
-                                            }
-                                        }
-
-                                        updateUnit(Launcher, unit_info.id, {
-                                            "data": old_data
-                                        });
-
-                                        console.log('cancel the unit ' + unit_info.id);
-                                        cancelUnit(Launcher, unit_info.id);
+                    //console.log(Launcher.units);
+                    generateResultsJob(Launcher, function() {});
+                    runRPrediction(Launcher, function() {
+                        obtainLimitFromMongo(Launcher, function(limit, completed) {
+                            if (completed / Launcher.job_info.units_count >= 0.7) {
+                                Launcher.duration_limit = parseFloat(limit * 1000);
+                                for (var unit_id in Launcher.units) {
+                                    console.log('unit details for ' + unit_id);
+                                    getUnitDetail(Launcher, unit_id, function(unit_info) {
+                                        processUnit(Launcher, unit_info);
                                     });
                                 }
-
+                                console.log(Launcher.units);
                             }
+                        })
+                    });
 
-                            // check if the unit is cancelled, but we received the judgments 
-                            if (unit_info.state == "canceled" &&
-                                unit_info.results.judgments.length > 0 &&
-                                unit_info.data.crowdlauncher.status == "NF") {
-                                console.log('we finilizing the cancelled task');
 
-                                updateUnit(Launcher, unit_info.id, {
-                                    "state": "finalized"
-                                });
-                            }
-
-                            if (unit_info.state == "finalized" && unit_info.results.judgments.length > 0 &&
-                                unit_info.data.crowdlauncher ) {
-                                //&& unit_info.data.crowdlauncher.status == "NF"
-                                console.log('we are in a finalized task');
-
-                                var data = unit_info.data;
-                                data['crowdlauncher']['status'] = "FN";
-                                updateUnit(Launcher, unit_info.id, {
-                                    "data": data
-                                });
-                                // Go deep to kids
-                                function meetNodes(node_id, field_name) {
-                                    getUnitDetail(Launcher, node_id, function(node_unit_info) {
-                                        console.log('checking '+field_name+ ' '+ node_id);
-                                        if (node_unit_info.data.crowdlauncher.status == "NF" && node_unit_info.state == 'canceled') {
-                                            var node_data = node_unit_info.data;
-                                            node_data['crowdlauncher']['status'] = "FN";
-                                            updateUnit(Launcher, node_unit_info.id, {
-                                                "data": node_data
-                                            });
-                                            if (['judging', 'judgable'].indexOf(node_unit_info.state) >= 0) {
-                                                cancelUnit(Launcher, node_unit_info.id);
-                                            }
-                                            if (node_unit_info.data.crowdlauncher[field_name]) {
-                                                next_node_id = node_unit_info.data.crowdlauncher[field_name];
-                                                meetParents(next_node_id, field_name);
-                                            }
-                                        }
-                                    });
-                                }
-                                if (unit_info.data.crowdlauncher.child_id) {
-                                    console.log('go through kids');
-                                    var child_id = unit_info.data.crowdlauncher.child_id;
-                                    meetNodes(child_id, 'child_id');
-                                }
-                                // Go deep to parents
-                                if (unit_info.data.crowdlauncher.parent_id) {
-                                    console.log('go through parents');
-                                    var parent_id = unit_info.data.crowdlauncher.parent_id;
-                                    meetNodes(parent_id, 'parent_id');
-                                }
-                            }
-                        });
-                    }
-                    console.log(Launcher.units);
                 });
             });
         }
@@ -222,12 +176,174 @@ router.route('/:id/launch')
 
     });
 
+function runRPrediction(Launcher, callback) {
+    var child = exec('Rscript R/predictLastDuration.R ' + Launcher.job_id + ' ' + Launcher.api_key + ' ' + Launcher.job_info.units_count, function(error, stdout, stderr) {
+        console.log('stdout: ' + stdout);
+        console.log('stderr: ' + stderr);
+        callback();
+        // Use connect method to connect to the Server
+
+    });
+}
+
+function obtainLimitFromMongo(Launcher, callback) {
+    var url = 'mongodb://localhost:27017/';
+    console.log(url);
+    MongoClient.connect(url, function(err, db) {
+        assert.equal(null, err);
+        console.log("Connected correctly to server");
+        getLimit(db, Launcher.job_id, function(limit, completed) {
+            db.close();
+            callback(limit, completed);
+
+
+        });
+    });
+}
+
+function processUnit(Launcher, unit_info) {
+    if (unit_info.state == "judging") {
+        processJudgingUnit(Launcher, unit_info);
+    }
+    if (unit_info.state == "canceled" && unit_info.results.judgments.length > 0 &&
+        unit_info.data.crowdlauncher.status == "NF") {
+        processCancelledUnit(Launcher, unit_info);
+    }
+    if (unit_info.state == "finalized" && unit_info.results.judgments.length > 0 && unit_info.data.crowdlauncher) {
+        processFinalizedUnit(Launcher, unit_info);
+    }
+
+}
+
+function processJudgingUnit(Launcher, unit_info, callback) {
+    console.log(unit_info);
+    if (needReassignment(unit_info, Launcher.duration_limit)) {
+
+        newUnit(Launcher, unit_info.data, function(new_unit_info) {
+            console.log('update new unit - to judgable');
+            updateUnit(Launcher, new_unit_info.id, {
+                "state": "judgable"
+            });
+            // Link new Unit to old Unit
+            var new_data = new_unit_info.data;
+            new_data['crowdlauncher'] = {
+                "parent_id": unit_info.id,
+                "status": "NF"
+            }
+            updateUnit(Launcher, new_unit_info.id, {
+                "data": new_data
+            });
+            // Link old Unit to new Unit
+            var old_data = unit_info.data;
+            if (old_data['crowdlauncher']) {
+                if (old_data['crowdlauncher']['parent_id']) {
+                    old_data['crowdlauncher']['child_id'] = new_unit_info.id;
+                }
+            } else {
+                old_data['crowdlauncher'] = {
+                    "child_id": new_unit_info.id,
+                    "status": "NF"
+                }
+            }
+
+            updateUnit(Launcher, unit_info.id, {
+                "data": old_data
+            });
+
+            console.log('cancel the unit ' + unit_info.id);
+            cancelUnit(Launcher, unit_info.id);
+        });
+    }
+}
+
+function processCancelledUnit(Launcher, unit_info, callback) {
+
+    console.log('we finilizing the cancelled task');
+    updateUnit(Launcher, unit_info.id, {
+        "state": "finalized"
+    }, function() {
+        unit_info.state = "finalized";
+        processFinalizedUnit(Launcher, unit_info);
+    });
+}
+
+function processFinalizedUnit(Launcher, unit_info, callback) {
+
+    //&& unit_info.data.crowdlauncher.status == "NF"
+    console.log('we are in a finalized unit');
+
+    var data = unit_info.data;
+    data['crowdlauncher']['status'] = "FN";
+    updateUnit(Launcher, unit_info.id, {
+        "data": data
+    }, function() {
+        if (unit_info.data.crowdlauncher.child_id) {
+            console.log('go through kids');
+            var child_id = unit_info.data.crowdlauncher.child_id;
+            meetNodes(Launcher, child_id, 'child_id');
+        }
+        // Go deep to parents
+        if (unit_info.data.crowdlauncher.parent_id) {
+            console.log('go through parents');
+            var parent_id = unit_info.data.crowdlauncher.parent_id;
+            meetNodes(Launcher, parent_id, 'parent_id');
+        }
+    });
+    // Go deep to kids
+}
+
+function meetNodes(Launcher, node_id, field_name) {
+    getUnitDetail(Launcher, node_id, function(node_unit_info) {
+        console.log('checking ' + field_name + ' ' + node_id);
+        // && node_unit_info.state == 'canceled'
+        if (node_unit_info.data.crowdlauncher.status == "NF") {
+            var node_data = node_unit_info.data;
+            node_data['crowdlauncher']['status'] = "FN";
+            updateUnit(Launcher, node_unit_info.id, {
+                "data": node_data
+            });
+            if (['judging', 'judgable'].indexOf(node_unit_info.state) >= 0) {
+                cancelUnit(Launcher, node_unit_info.id);
+            }
+            if (node_unit_info.data.crowdlauncher[field_name]) {
+                next_node_id = node_unit_info.data.crowdlauncher[field_name];
+                meetNodes(Launcher, next_node_id, field_name);
+            }
+        }
+    });
+}
+var getLimit = function(db, job_id, callback) {
+    // Get the documents collection
+    var collection = db.collection('collection');
+    // Find some documents
+    collection.find({
+        "job_id": parseInt(job_id)
+    }).toArray(function(err, docs) {
+        assert.equal(err, null);
+        console.log("Found the following records");
+        console.dir(docs);
+        var limit = docs[docs.length - 1].limit;
+        var completed = docs[docs.length - 1].completed
+        if (limit > 0) {
+            callback(limit, completed);
+        }
+
+    });
+}
+
+function generateResultsJob(launcher, callback) {
+    requestify.post(CrowdFlower.getEndpoint(launcher.api_key, 'jobs/' + launcher.job_id + '/regenerate', '', '&type=full'))
+        .then(function(crowdflower_resp) {
+            callback();
+        });
+}
 
 function getJobInfo(launcher, callback) {
+
     requestify.get(CrowdFlower.getEndpoint(launcher.api_key, 'jobs/' + launcher.job_id))
         .then(function(crowdflower_resp) {
             launcher['job_info'] = crowdflower_resp.getBody();
-            callback()
+            callback(launcher);
         });
 }
 
@@ -235,7 +351,7 @@ function getUnits(launcher, callback) {
     requestify.get(CrowdFlower.getEndpoint(launcher.api_key, 'jobs/' + launcher.job_id + '/units'))
         .then(function(crowdflower_resp) {
             launcher['units'] = crowdflower_resp.getBody();
-            callback()
+            callback(launcher);
         });
 }
 
@@ -259,7 +375,7 @@ function launchJob(launcher, callback) {
     requestify.post(CrowdFlower.getEndpoint(launcher.api_key, 'jobs/' + launcher.job_id + '/orders'), post_data)
         .then(function(crowdflower_resp) {
             console.log(crowdflower_resp.getBody());
-            callback();
+            callback(launcher);
         });
 }
 
@@ -271,13 +387,15 @@ function cancelUnit(launcher, unit_id) {
         });
 }
 
-function updateUnit(launcher, unit_id, data) {
+function updateUnit(launcher, unit_id, data, callback) {
     var put_data = {
         "unit": data
     }
     requestify.put(CrowdFlower.getEndpoint(launcher.api_key, 'jobs/' + launcher.job_id + '/units/' + unit_id), put_data)
         .then(function(crowdflower_resp) {
             console.log(crowdflower_resp.getBody());
+            if (callback)
+                callback();
         });
 }
 
