@@ -187,7 +187,7 @@ function runRPrediction(Launcher, callback) {
 }
 
 function obtainLimitFromMongo(Launcher, callback) {
-    var url = 'mongodb://localhost:27017/';
+    var url = process.env.MONGOLAB_URI;
     console.log(url);
     MongoClient.connect(url, function(err, db) {
         assert.equal(null, err);
