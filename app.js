@@ -15,7 +15,7 @@ var allowCrossDomain = function(req, res, next) {
     next();
 }
 app.use(allowCrossDomain);
-app.use(express.static('public'));
+app.use(express.static('Public'));
 
 var jobs = require('./routes/jobs');
 app.use('/jobs', jobs);

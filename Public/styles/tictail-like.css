@@ -1,0 +1,113 @@
+body {
+    background-color: white;
+    display: block;
+    font-family: 'Open Sans', sans-serif;
+    font-style: normal;
+    font-variant: normal;
+    color: #000;
+}
+
+a,
+a:hover {
+    text-decoration: none;
+}
+
+a {
+    color: #222;
+}
+
+a:hover {
+    color: #FCC100;
+}
+
+h1,
+h2,
+h3,
+h4 {
+    font-weight: bold;
+}
+
+.hero {
+    background-color: #FCC100;
+    padding: 10px;
+}
+
+h1 {
+    font-size: 120px;
+    line-height: 140px;
+    color: white;
+}
+
+h2 {
+    font-size: 72px;
+    line-height: 80px;
+    color: white;
+}
+
+h3 {
+    font-size: 63px;
+    line-height: 70px;
+}
+
+h3 {
+    font-size: 50px;
+    line-height: 60px;
+}
+
+p {
+    font-size: 18px;
+    line-height: 29px;
+}
+
+.dark {
+    background-color: #222;
+}
+
+.dark * {
+    text-align: center;
+}
+
+.color-light {
+    color: white;
+}
+
+input {
+    font-size: 50px;
+    line-height: 60px;
+    padding: 5px 35px;
+    text-align: center;
+    letter-spacing: 4px;
+    border: 4px solid;
+    border-radius: 50px;
+    width: 100%;
+}
+
+.job {
+    opacity: 0.3;
+    width:100%;
+    display: inline-block;
+    padding-left: 30px;
+    margin-top: 10px;
+    border-left: 10px solid;
+}
+.job-action{
+    display:none;
+}
+.job h3:hover .job-action{
+    display:inline-block;
+}
+
+.job.unordered {
+    opacity: 1;
+}
+/*
+.job.running {
+    border-color: #FCC100;
+}
+
+.job.cancelled {
+    border-color: red;
+    opacity: 0.3;
+    display: none;
+}
+*/
