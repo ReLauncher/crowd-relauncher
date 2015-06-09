@@ -4,7 +4,7 @@
         current_job: false,
         current_job_id: false,
         key: false,
-        api_base: 'http://http://crowd-relauncher.herokuapp.com/'
+        api_base: '/'
     }
     var app = angular.module('crowdLauncher', [
         'flower-directives',
