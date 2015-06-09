@@ -3,6 +3,11 @@ var app = express();
 
 // Connection URL
 
+var opbeat = require('opbeat')({
+    organizationId: 'd4059ab7bfd54d8e96b42fb55586509e',
+    appId: 'c5b8d46e16',
+    secretToken: 'bfb35dfca6b902e2e9ece9757287eb16cc46047d'
+});
 
 var logger = require('./logger');
 app.use(logger);
