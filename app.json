@@ -1,6 +1,6 @@
 {
   "name": "Crowd ReLauncher",
-  "description": "An application which helps to drammatically reduce the overall tasks execution time on CrowdFlower by relaunching the units taking too much time.",
+  "description": "ReLauncher cancels and relaunches units which are in judging mode for too long time",
   "repository": "https://github.com/pavelk2/crowd-launcher-api",
   "logo": "https://node-js-sample.herokuapp.com/node.svg",
   "keywords": ["node", "express", "static"]
