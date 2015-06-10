@@ -152,23 +152,23 @@ router.route('/:id/launch')
                     console.log('units list collected');
                     //console.log(Launcher.units);
                     generateResultsJob(Launcher, function() {
-                        setTimeout(function(){
+                        setTimeout(function() {
                             runRPrediction(Launcher, function() {
-                            obtainLimitFromMongo(Launcher, function(limit, completed) {
-                                if (completed / Launcher.job_info.units_count >= 0.7) {
-                                    Launcher.duration_limit = parseFloat(limit * 1000);
-                                    for (var unit_id in Launcher.units) {
-                                        console.log('unit details for ' + unit_id);
-                                        getUnitDetail(Launcher, unit_id, function(unit_info) {
-                                            processUnit(Launcher, unit_info);
-                                        });
+                                obtainLimitFromMongo(Launcher, function(limit, completed) {
+                                    if (completed / Launcher.job_info.units_count >= 0.7) {
+                                        Launcher.duration_limit = parseFloat(limit * 1000);
+                                        for (var unit_id in Launcher.units) {
+                                            console.log('unit details for ' + unit_id);
+                                            getUnitDetail(Launcher, unit_id, function(unit_info) {
+                                                processUnit(Launcher, unit_info);
+                                            });
+                                        }
+                                        console.log(Launcher.units);
                                     }
-                                    console.log(Launcher.units);
-                                }
-                            })
-                        }); 
-                        },5000);
-                        
+                                })
+                            });
+                        }, 5000);
+
                     });
 
                 });
@@ -189,7 +189,13 @@ function runRPrediction(Launcher, callback) {
 }
 
 function obtainLimitFromMongo(Launcher, callback) {
-    var url = process.env.MONGOLAB_URI;
+    fs.readFile('/Datasets/Limits/'+Launcher.job_id+'.txt', function(err, data) {
+        if (err) throw err;
+        var pred = JSON.parse(data);
+        console.log(pred);
+        callback(pred.limit, pred.completed);
+    });
+    /*var url = process.env.MONGOLAB_URI;
     console.log(url);
     MongoClient.connect(url, function(err, db) {
         assert.equal(null, err);
@@ -200,7 +206,7 @@ function obtainLimitFromMongo(Launcher, callback) {
 
 
         });
-    });
+    });*/
 }
 
 function processUnit(Launcher, unit_info) {

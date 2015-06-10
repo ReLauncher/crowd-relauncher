@@ -62,9 +62,13 @@ if (data != FALSE && nrow(data)>=5){
 	completed <- 0
 }
 
-m <- mongo.create(host=host , db=db, username=username, password=password)
-ns <- "admin.collection"
+fileConn<-file(paste("Datasets/Limits/",JOB_ID,".txt")
 json <- paste('{"job_id":',JOB_ID,', "limit":',current_prediction,', "completed":',completed,'}', sep='')
-bson <- mongo.bson.from.JSON(json)
-mongo.insert(m, ns, bson)
+writeLines(c(json), fileConn)
+close(fileConn)
+
+#m <- mongo.create(host=host , db=db, username=username, password=password)
+#ns <- "admin.collection"
+#bson <- mongo.bson.from.JSON(json)
+#mongo.insert(m, ns, bson)
 
