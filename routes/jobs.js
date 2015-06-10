@@ -127,14 +127,14 @@ router.route('/:id/launch')
 
         console.log('get info');
         getJobInfo(Launcher, function() {
-            console.log('launch the job');
-            launchJob(Launcher, function(Launcher) {
+            //console.log('launch the job');
+            //launchJob(Launcher, function(Launcher) {
                 console.log('start timer');
                 periodicCheck(Launcher);
                 Launcher['timer'] = setInterval(function() {
                     periodicCheck(Launcher);
                 }, Launcher.interval);
-            });
+            //});
         });
 
 

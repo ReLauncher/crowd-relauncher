@@ -6,7 +6,8 @@ var app = express();
 var opbeat = require('opbeat')({
     organizationId: process.env.OPBEAT_ORGANIZATION_ID,
     appId: process.env.OPBEAT_APP_ID,
-    secretToken: process.env.OPBEAT_SECRET_TOKEN
+    secretToken: process.env.OPBEAT_SECRET_TOKEN,
+    debug: true
 });
 
 var logger = require('./logger');
