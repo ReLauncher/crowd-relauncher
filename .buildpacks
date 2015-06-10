@@ -1,2 +1,3 @@
-https://github.com/heroku/heroku-buildpack-nodejs.git
 http://github.com/virtualstaticvoid/heroku-buildpack-r.git
+https://github.com/heroku/heroku-buildpack-nodejs.git
+
