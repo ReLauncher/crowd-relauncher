@@ -3,5 +3,26 @@
   "description": "ReLauncher cancels and relaunches units which are in judging mode for too long time",
   "repository": "https://github.com/pavelk2/crowd-launcher-api",
   "logo": "https://node-js-sample.herokuapp.com/node.svg",
-  "keywords": ["node", "express", "static"]
+  "keywords": ["node", "express", "static"],
+  "addons": [
+    "mongolab"
+  ],
+  "env": {
+    "HEROKU_URL": {
+      "description": "The URL of this Heroku app.",
+      "value": "http://YOURAPPNAME.herokuapp.com"
+    },
+    "OPBEAT_APP_ID": {
+      "description": "Set it up to get immediate details of any errors in opbeat.com",
+      "required": false
+    },
+    "OPBEAT_ORGANIZATION_ID": {
+      "description": "Set it up to get immediate details of any errors in opbeat.com",
+      "required": false
+    },
+    "OPBEAT_SECRET_TOKEN": {
+      "description": "Set it up to get immediate details of any errors in opbeat.com",
+      "required": false
+    }
+  }
 }

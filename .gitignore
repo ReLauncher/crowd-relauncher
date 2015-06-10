@@ -1,3 +1,5 @@
 node_modules
 *.log
+Data/*
+Datasets/*
 npm-shrinkwrap.json
