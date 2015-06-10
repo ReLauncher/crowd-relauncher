@@ -22,10 +22,10 @@ if (data != FALSE && nrow(data)>=5){
 	x <- data$duration_num
 	print(x)
 	indexes <- c(1:nrow(data))
-	filename = paste('Public/',JOB_ID,'.png',sep="")
+	#filename = paste('Public/',JOB_ID,'.pdf',sep="")
 
-	png(filename)
-	plot(indexes, x, xlab="Judgement index",ylab="Judgement duration, seconds", xlim=c(1,max(c(UNITS_AMOUNT,nrow(data)))))
+	#pdf(filename)
+	#plot(indexes, x, xlab="Judgement index",ylab="Judgement duration, seconds", xlim=c(1,max(c(UNITS_AMOUNT,nrow(data)))))
 
 	i <-1
 
@@ -42,7 +42,7 @@ if (data != FALSE && nrow(data)>=5){
 		}
 	}
 
-	points(y_indexes, y, col='red')
+	#points(y_indexes, y, col='red')
 
 	hypothesis1.lm = lm(y ~ y_indexes)
 	print(summary(hypothesis1.lm))
@@ -52,9 +52,9 @@ if (data != FALSE && nrow(data)>=5){
 	current_prediction <- round(current_prediction)
 	print(current_prediction)
 
-	abline(hypothesis1.lm, col=alpha('grey', 0.5))
-	abline(current_prediction,0, col=alpha('blue', 0.5))
-	dev.off()
+	#abline(hypothesis1.lm, col=alpha('grey', 0.5))
+	#abline(current_prediction,0, col=alpha('blue', 0.5))
+	#dev.off()
 	
 	completed <- nrow(data)
 }else{
