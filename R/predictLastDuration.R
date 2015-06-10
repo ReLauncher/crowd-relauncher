@@ -1,12 +1,5 @@
 source("R/libs/crowdResultsCollect.R")
-library(rmongodb)
 #library(ggplot)
-#mongodb://heroku_0lq2cz6f:ookpaeqbiipb7imotbb9vt7kjr@ds043982.mongolab.com:43982/heroku_0lq2cz6f
-
-host <- "ds043982.mongolab.com:43982"
-username <- "heroku_0lq2cz6f"
-password <- "ookpaeqbiipb7imotbb9vt7kjr"
-db <- "heroku_0lq2cz6f"
 
 
 
@@ -62,7 +55,7 @@ if (data != FALSE && nrow(data)>=5){
 	completed <- 0
 }
 
-fileConn<-file(paste("Datasets/Limits/",JOB_ID,".txt"))
+fileConn<-file(paste("Datasets/Limits/",JOB_ID,".json", sep=""))
 json <- paste('{"job_id":',JOB_ID,', "limit":',current_prediction,', "completed":',completed,'}', sep='')
 writeLines(c(json), fileConn)
 close(fileConn)

@@ -165,10 +165,9 @@ router.route('/:id/launch')
                                         }
                                         console.log(Launcher.units);
                                     }
-                                })
+                                });
                             });
-                        }, 5000);
-
+                        }, 3000);
                     });
 
                 });
@@ -189,12 +188,10 @@ function runRPrediction(Launcher, callback) {
 }
 
 function obtainLimitFromMongo(Launcher, callback) {
-    fs.readFile('/Datasets/Limits/'+Launcher.job_id+'.txt', function(err, data) {
-        if (err) throw err;
-        var pred = JSON.parse(data);
-        console.log(pred);
-        callback(pred.limit, pred.completed);
-    });
+    var fs = require('fs');
+    var pred = JSON.parse(fs.readFileSync('Datasets/Limits/' + Launcher.job_id + '.json', 'utf8'));
+    callback(pred.limit, pred.completed);
+
     /*var url = process.env.MONGOLAB_URI;
     console.log(url);
     MongoClient.connect(url, function(err, db) {
