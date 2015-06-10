@@ -1,2 +1,2 @@
 https://github.com/heroku/heroku-buildpack-nodejs.git
-http://github.com/virtualstaticvoid/heroku-buildpack-r.git
+http://github.com/virtualstaticvoid/heroku-buildpack-r.git#cedar-14
