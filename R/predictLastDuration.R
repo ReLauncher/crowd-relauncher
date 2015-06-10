@@ -62,7 +62,7 @@ if (data != FALSE && nrow(data)>=5){
 	completed <- 0
 }
 
-fileConn<-file(paste("Datasets/Limits/",JOB_ID,".txt")
+fileConn<-file(paste("Datasets/Limits/",JOB_ID,".txt"))
 json <- paste('{"job_id":',JOB_ID,', "limit":',current_prediction,', "completed":',completed,'}', sep='')
 writeLines(c(json), fileConn)
 close(fileConn)
