@@ -129,11 +129,11 @@ router.route('/:id/launch')
         getJobInfo(Launcher, function() {
             //console.log('launch the job');
             //launchJob(Launcher, function(Launcher) {
-                console.log('start timer');
+            console.log('start timer');
+            periodicCheck(Launcher);
+            Launcher['timer'] = setInterval(function() {
                 periodicCheck(Launcher);
-                Launcher['timer'] = setInterval(function() {
-                    periodicCheck(Launcher);
-                }, Launcher.interval);
+            }, Launcher.interval);
             //});
         });
 
@@ -151,22 +151,25 @@ router.route('/:id/launch')
                 getUnits(Launcher, function(Launcher) {
                     console.log('units list collected');
                     //console.log(Launcher.units);
-                    generateResultsJob(Launcher, function() {});
-                    runRPrediction(Launcher, function() {
-                        obtainLimitFromMongo(Launcher, function(limit, completed) {
-                            if (completed / Launcher.job_info.units_count >= 0.7) {
-                                Launcher.duration_limit = parseFloat(limit * 1000);
-                                for (var unit_id in Launcher.units) {
-                                    console.log('unit details for ' + unit_id);
-                                    getUnitDetail(Launcher, unit_id, function(unit_info) {
-                                        processUnit(Launcher, unit_info);
-                                    });
+                    generateResultsJob(Launcher, function() {
+                        setTimeout(function(){
+                            runRPrediction(Launcher, function() {
+                            obtainLimitFromMongo(Launcher, function(limit, completed) {
+                                if (completed / Launcher.job_info.units_count >= 0.7) {
+                                    Launcher.duration_limit = parseFloat(limit * 1000);
+                                    for (var unit_id in Launcher.units) {
+                                        console.log('unit details for ' + unit_id);
+                                        getUnitDetail(Launcher, unit_id, function(unit_info) {
+                                            processUnit(Launcher, unit_info);
+                                        });
+                                    }
+                                    console.log(Launcher.units);
                                 }
-                                console.log(Launcher.units);
-                            }
-                        })
+                            })
+                        }); 
+                        },5000)
+                        
                     });
-
 
                 });
             });
