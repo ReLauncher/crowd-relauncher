@@ -1,6 +1,14 @@
 source("R/libs/crowdResultsCollect.R")
 library(rmongodb)
 #library(ggplot)
+#mongodb://heroku_0lq2cz6f:ookpaeqbiipb7imotbb9vt7kjr@ds043982.mongolab.com:43982/heroku_0lq2cz6f
+
+host <- "ds043982.mongolab.com:43982"
+username <- "heroku_0lq2cz6f"
+password <- "ookpaeqbiipb7imotbb9vt7kjr"
+db <- "heroku_0lq2cz6f"
+
+
 
 JOB_ID <- as.numeric(commandArgs(trailingOnly=TRUE)[1])
 API_KEY <- commandArgs(trailingOnly=TRUE)[2]
@@ -54,7 +62,7 @@ if (data != FALSE && nrow(data)>=5){
 	completed <- 0
 }
 
-m <- mongo.create()
+m <- mongo.create(host=host , db=db, username=username, password=password)
 ns <- "admin.collection"
 json <- paste('{"job_id":',JOB_ID,', "limit":',current_prediction,', "completed":',completed,'}', sep='')
 bson <- mongo.bson.from.JSON(json)
