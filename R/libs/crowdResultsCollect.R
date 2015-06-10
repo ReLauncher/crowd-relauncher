@@ -59,9 +59,8 @@ collectResults <- function(crowdsourcing_platform, api_key, job_id, title, batch
 collectResultsCrowdFlower <- function(job_id, api_key, title, batch,variation, download = F){
 
 	# (comment if is already downloaded)download the latest zip file with full results for the target job
-	closeAllConnections()
 	con <- download(paste("https://api.crowdflower.com/v1/jobs/",job_id,".csv?type=full&key=",api_key, sep = ""), mode = "wb", destfile = paste("Datasets/",job_id,".zip", sep=""))
-	closeAllConnections()
+	
 	# read the csv from the zip file
 	data <- read.table(unz(paste("Datasets/",job_id,".zip", sep=""), paste("f",job_id,".csv", sep="")), header=T, sep=",",quote = "\"",comment.char = "")
 	if (nrow(data) == 0){
@@ -83,7 +82,7 @@ collectResultsCrowdFlower <- function(job_id, api_key, title, batch,variation, d
 		result = data
 	}
 	
-	
+	closeAllConnections()
 	result
 
 }
