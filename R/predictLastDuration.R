@@ -14,7 +14,7 @@ if (data != FALSE && nrow(data)>=5){
 	x <- data$duration_num
 	print(x)
 	indexes <- c(1:nrow(data))
-	filename = paste('Datasets/Plots/',JOB_ID,'.png',sep="")
+	filename = paste('Public/',JOB_ID,'.png',sep="")
 
 	png(filename)
 	plot(indexes, x, xlab="Judgement index",ylab="Judgement duration, seconds", xlim=c(1,max(c(UNITS_AMOUNT,nrow(data)))))
