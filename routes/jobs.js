@@ -5,9 +5,6 @@ var router = express.Router();
 var _ = require('lodash');
 var fs = require('fs');
 
-var MongoClient = require('mongodb').MongoClient,
-    assert = require('assert');
-
 
 var bodyParser = require('body-parser');
 
@@ -60,63 +57,12 @@ router.route('/:id')
                 response.json(job);
             });
     });
-// =====================================================
-// Order units in a given job
-// =====================================================
-router.route('/:id/order')
-    .post(parseUrlencoded, function(request, response) {
-        var job_id = request.params.id;
-        var api_key = request.body.api_key;
-        // TODO: in production - use real channels + units_count = all job units
-        var post_data = {
-            "channels": ["cf_internal"],
-            "debit": {
-                "units_count": 1
-            }
-        }
-        requestify.post(CrowdFlower.getEndpoint(api_key, 'jobs/' + job_id + '/orders'), post_data)
-            .then(function(crowdflower_resp) {
-                var job = crowdflower_resp.getBody();
-                response.json(job);
-            });
-    });
 
-router.route('/:id/predict')
-    .post(parseUrlencoded, function(request, response) {
-
-        var job_id = request.params.id;
-        var api_key = request.body.api_key;
-
-        var Launcher = {
-            'api_key': request.body.api_key,
-            'job_id': request.params.id,
-            'interval': 1 * 60 * 1000,
-            'duration_limit': 10 * 60 * 1000,
-            'iteration': 0
-        };
-        //generateResultsJob(Launcher, function() {
-        var units_amount = 50;
-        var child = exec('Rscript R/predictLastDuration.R ' + Launcher.job_id + ' ' + Launcher.api_key + ' ' + 100, function(error, stdout, stderr) {
-
-            console.log('stdout: ' + stdout);
-            console.log('stderr: ' + stderr);
-
-            if (error !== null) {
-                console.log('exec error: ' + error);
-            }
-            response.json('check logs');
-
-        });
-        //});
-    });
 // =====================================================
 // Launch a job with re-assignment
 // =====================================================
 router.route('/:id/launch')
     .post(parseUrlencoded, function(request, response) {
-        // TODO: in production - use real channels + units_coun
-        // t = all job units
-
         var Launcher = {
             'api_key': request.body.api_key,
             'job_id': request.params.id,
@@ -127,14 +73,16 @@ router.route('/:id/launch')
 
         console.log('get info');
         getJobInfo(Launcher, function() {
-            //console.log('launch the job');
-            //launchJob(Launcher, function(Launcher) {
-            console.log('start timer');
-            periodicCheck(Launcher);
-            Launcher['timer'] = setInterval(function() {
+            console.log('launch the job');
+            launchJob(Launcher, function(Launcher) {
+                console.log('start timer');
+                response.json('the rocket is launched');
                 periodicCheck(Launcher);
-            }, Launcher.interval);
-            //});
+                Launcher['timer'] = setInterval(function() {
+                    periodicCheck(Launcher);
+
+                }, Launcher.interval);
+            });
         });
 
 
@@ -163,17 +111,15 @@ router.route('/:id/launch')
                                                 processUnit(Launcher, unit_info);
                                             });
                                         }
-                                        console.log(Launcher.units);
                                     }
                                 });
                             });
                         }, 3000);
                     });
-
                 });
             });
         }
-        response.json('the rocket is launched');
+        
 
     });
 
@@ -191,19 +137,6 @@ function obtainLimitFromMongo(Launcher, callback) {
     var fs = require('fs');
     var pred = JSON.parse(fs.readFileSync('Datasets/Limits/' + Launcher.job_id + '.json', 'utf8'));
     callback(pred.limit, pred.completed);
-
-    /*var url = process.env.MONGOLAB_URI;
-    console.log(url);
-    MongoClient.connect(url, function(err, db) {
-        assert.equal(null, err);
-        console.log("Connected correctly to server");
-        getLimit(db, Launcher.job_id, function(limit, completed) {
-            db.close();
-            callback(limit, completed);
-
-
-        });
-    });*/
 }
 
 function processUnit(Launcher, unit_info) {

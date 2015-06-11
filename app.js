@@ -1,13 +1,11 @@
 var express = require('express');
 var app = express();
 
-// Connection URL
-
+// Catching errors Opbeat.com
 var opbeat = require('opbeat')({
     organizationId: process.env.OPBEAT_ORGANIZATION_ID,
     appId: process.env.OPBEAT_APP_ID,
-    secretToken: process.env.OPBEAT_SECRET_TOKEN,
-    debug: true
+    secretToken: process.env.OPBEAT_SECRET_TOKEN
 });
 
 var logger = require('./logger');
@@ -18,9 +16,9 @@ var allowCrossDomain = function(req, res, next) {
     res.header('Access-Control-Allow-Origin', 'http://localhost');
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Content-Type');
-
     next();
 }
+
 app.use(allowCrossDomain);
 app.use(express.static('Public'));
 
