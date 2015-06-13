@@ -1,7 +1,7 @@
 {
-  "name": "CrowdLauncher",
+  "name": "ReLauncher",
   "version": "0.0.0",
-  "description": "HumanComputation Conference 2015",
+  "description": "CSCW 2016",
   "author": "Pavel Kucherbaev <pavel@kucherbaev.com>",
   "dependencies": {
     "body-parser": "^1.8.1",
@@ -9,11 +9,13 @@
     "express": "^4.9.5",
     "lodash": "^2.4.1",
     "requestify": "0.1.17",
-    "mongodb": "2.0.33",
     "request":"2.42.0",
-    "opbeat":"1.4.1"
+    "opbeat":"1.4.1",
+    "bower":"1.4.1",
+    "npmlog":"1.2.1"
   },
   "scripts": {
-    "start": "node app.js"
+    "start": "node App/app.js",
+    "postinstall": "cd Web && bower install && cd .. && mkdir Runtime && cd Runtime && mkdir Datasets && mkdir Limits && mkdir Plots && cd .."
   }
 }
