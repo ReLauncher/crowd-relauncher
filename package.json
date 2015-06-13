@@ -16,6 +16,6 @@
   },
   "scripts": {
     "start": "node App/app.js",
-    "postinstall": "cd Web && bower install && cd .. && mkdir Runtime && cd Runtime && mkdir Datasets && mkdir Limits && mkdir Plots && cd .."
+    "postinstall": "cd Web && bower install && cd .. && mkdir Datasets && mkdir Limits && mkdir Plots && cd .."
   }
 }
