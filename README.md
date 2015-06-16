@@ -1,7 +1,7 @@
 # Crowd-ReLauncher
 A runtime controller, which cancels and relaunches delayed units on [CrowdFlower](http://www.crowdflower.com) to improve the overall task execution time.
 
-An example of a task with 20 units ran on CrowdFlower:
+An example of an execution timeline for a task with 20 units on CrowdFlower:
 ![](Web/img/abstract.png)
 
 A comparison of a task with 100 units ran *without* and *with* **ReLauncher**:
