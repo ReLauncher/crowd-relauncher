@@ -4,7 +4,7 @@ A runtime controller, which cancels and relaunches delayed units on [CrowdFlower
 An example of an execution timeline for a task with 20 units on CrowdFlower:
 ![](Web/img/abstract.png)
 
-A comparison of a task with 100 units ran *without* and *with* **ReLauncher**:
+A comparison of a task with 100 units ran 3 times *without* and 3 times *with* **ReLauncher**:
 ![](Web/img/comparison.png)
 
 You can deploy ReLauncher on Heroku in one-click for free:
