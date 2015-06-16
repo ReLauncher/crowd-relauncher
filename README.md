@@ -11,7 +11,7 @@ You can deploy ReLauncher on Heroku in one-click for free:
 
 [![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
 
-#### [Checkout out demo](https://crowd-relauncher.herokuapp.com)
+#### [Checkout out the online demo](https://crowd-relauncher.herokuapp.com)
 To use the demo you need to enter your CrowdFlower API Key, you can find [here](https://make.crowdflower.com/account/user). This API key is not stored anywhere and is used only to send requests to CrowdFlower from your account.
 
 
