@@ -1,4 +1,6 @@
 # Crowd-ReLauncher
+[![Build Status](https://travis-ci.org/pavelk2/crowd-relauncher.svg)](https://travis-ci.org/pavelk2/crowd-relauncher)
+
 A runtime controller, which cancels and relaunches delayed units on [CrowdFlower](http://www.crowdflower.com) to improve the overall task execution time.
 
 An example of an execution timeline for a task with 20 units on CrowdFlower:
