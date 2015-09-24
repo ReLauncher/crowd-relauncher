@@ -1,4 +1,4 @@
-# Crowd-ReLauncher
+# ReLauncher – Server side only
 [![Build Status](https://travis-ci.org/pavelk2/crowd-relauncher.svg)](https://travis-ci.org/pavelk2/crowd-relauncher)
 [![Code Climate](https://codeclimate.com/github/pavelk2/crowd-relauncher/badges/gpa.svg)](https://codeclimate.com/github/pavelk2/crowd-relauncher)
 
@@ -16,5 +16,8 @@ You can deploy ReLauncher on Heroku in one-click for free:
 
 #### [Checkout out the online demo](https://crowd-relauncher.herokuapp.com)
 To use the demo you need to enter your CrowdFlower API Key, you can find [here](https://make.crowdflower.com/account/user). This API key is not stored anywhere and is used only to send requests to CrowdFlower from your account.
+
+#### Publication
+The paper describing the approach is accepted to [CSCW2016 conference in San Francisco](http://cscw.acm.org/2016/index.php)
 
 
