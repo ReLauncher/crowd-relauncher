@@ -1,4 +1,5 @@
 source("R/libs/crowdResultsCollect.R")
+library(methods)
 #library(ggplot)
 
 
