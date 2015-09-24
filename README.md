@@ -1,5 +1,6 @@
 # Crowd-ReLauncher
 [![Build Status](https://travis-ci.org/pavelk2/crowd-relauncher.svg)](https://travis-ci.org/pavelk2/crowd-relauncher)
+[![Code Climate](https://codeclimate.com/github/pavelk2/crowd-relauncher/badges/gpa.svg)](https://codeclimate.com/github/pavelk2/crowd-relauncher)
 
 A runtime controller, which cancels and relaunches delayed units on [CrowdFlower](http://www.crowdflower.com) to improve the overall task execution time.
 
