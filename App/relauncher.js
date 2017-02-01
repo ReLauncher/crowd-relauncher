@@ -13,6 +13,8 @@ module.exports = function(api_key, job_id) {
     this.interval = 1 * 60 * 1000;
     this.duration_limit = 10 * 60 * 1000;
     this.iteration = 0;
+    this.toRelaunch = [];
+    this.relaunched = [];
 };
 
 module.exports.prototype = {
@@ -52,29 +54,60 @@ module.exports.prototype = {
                 log.info(moduletitle, ' units list collected');
                 launcher.generateResultsJob(function() {
                     setTimeout(function() {
-                        launcher.runRPrediction(function() {
-                            launcher.obtainLimit(function(limit, completed) {
-                                if (completed / launcher.job_info.units_count >= 0.7) {
-                                    launcher.duration_limit = parseFloat(limit * 1000);
+                        launcher.collectBehaviorLogs(function(){
+                            launcher.runRPredictionLoqQualityBehavior(function() {
+                                launcher.obtainUnitsToRelaunch(function(toRelaunch){
+                                    log.info(moduletitle, typeof(toRelaunch));
+                                    launcher.toRelaunch = toRelaunch;
+                                    log.info(moduletitle, ' UNITS: '+launcher.units);
                                     var units = [];
                                     for (var unit_id in launcher.units) {
                                         units[unit_id] = new Unit(launcher, unit_id);
-                                        
+                                        units[unit_id].getDetail(function(unit_with_details) {
+                                            unit_with_details.process();
+                                        });
+                                    }
+                                });
+                            });
+                        });
+                        //Launcher.runRPredictionClosedTabs(function() {
+                            //launcher.obtainLimit(function(limit, completed) {
+                                //if (completed / launcher.job_info.units_count >= 0.7) {
+                                    //launcher.duration_limit = parseFloat(limit * 1000);
+                                    /*var units = [];
+                                    for (var unit_id in launcher.units) {
+                                        units[unit_id] = new Unit(launcher, unit_id);
                                         units[unit_id].getDetail(function(unit_with_details) {
                                         	unit_with_details.process();
                                         });
-                                    }
-                                }
-                            });
-                        });
+                                    //}*/
+                                //}
+                            //});
+                        //});
                     }, 3000);
                 });
             });
         });
     },
-    runRPrediction: function(callback) {
+    runRPredictionLinearRegression: function(callback) {
     	var launcher = this;
         var child = exec('Rscript R/predictLastDuration.R ' + launcher.job_id + ' ' + launcher.api_key + ' ' + launcher.job_info.units_count, function(error, stdout, stderr) {
+            log.info(moduletitle, 'R output ' + stdout);
+            log.info(moduletitle, 'R errors ' + stderr);
+            callback();
+        });
+    },
+    runRPredictionClosedTabs: function(callback) {
+        var launcher = this;
+        var child = exec('Rscript R/predictAbandonedTabVisibility.R ' + launcher.job_id + ' ' + launcher.api_key, function(error, stdout, stderr) {
+            log.info(moduletitle, 'R output ' + stdout);
+            log.info(moduletitle, 'R errors ' + stderr);
+            callback();
+        });
+    },
+    runRPredictionLoqQualityBehavior: function(callback) {
+        var launcher = this;
+        var child = exec('Rscript R/predictLowQualityBehavior.R ' + launcher.job_id + ' ' + launcher.api_key, function(error, stdout, stderr) {
             log.info(moduletitle, 'R output ' + stdout);
             log.info(moduletitle, 'R errors ' + stderr);
             callback();
@@ -86,6 +119,27 @@ module.exports.prototype = {
         var pred = JSON.parse(fs.readFileSync('Datasets/Limits/' + launcher.job_id + '.json', 'utf8'));
     	log.info(moduletitle,'predictions '+pred);
         callback(pred.limit, pred.completed);
+    },
+    obtainUnitsToRelaunch: function(callback) {
+        var launcher = this;
+        try {
+            var pred = JSON.parse(fs.readFileSync('Datasets/ToRelaunch/' + launcher.job_id + '.json', 'utf8'));
+            log.info(moduletitle,'assignments to relaunch '+pred);
+            log.info(moduletitle,(typeof pred));
+            callback(pred);
+        } catch (e) {
+            log.info(moduletitle,e);
+        }
+    },
+    collectBehaviorLogs: function(callback){
+        var launcher = this;
+        var child = exec('./Scripts/generate_logs.sh ' + launcher.job_id, function(error, stdout, stderr) {
+            log.info(moduletitle, 'Node ids maker output ' + stdout);
+            if (stderr){
+                log.info(moduletitle, 'Node ids maker errors ' + stderr);
+            }
+            callback();
+        });
     },
     createUnit: function(data, callback) {
     	log.info(moduletitle,'creating new unit...');

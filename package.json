@@ -3,6 +3,8 @@
   "version": "0.0.0",
   "description": "CSCW 2016",
   "author": "Pavel Kucherbaev <pavel@kucherbaev.com>",
+  "license" : "MIT",
+  "repository": "https://github.com/ReLauncher/crowd-relauncher",
   "dependencies": {
     "body-parser": "^1.8.1",
     "debug": "^0.8.1",
@@ -10,7 +12,7 @@
     "lodash": "^2.4.1",
     "requestify": "0.1.17",
     "request":"2.42.0",
-    "opbeat":"1.4.1",
+    "opbeat":"3.19.1",
     "bower":"1.4.1",
     "npmlog":"1.2.1"
   },

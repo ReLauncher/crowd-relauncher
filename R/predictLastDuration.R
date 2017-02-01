@@ -16,10 +16,6 @@ if (data != FALSE && nrow(data)>=5){
 	x <- data$duration_num
 	print(x)
 	indexes <- c(1:nrow(data))
-	#filename = paste('Public/',JOB_ID,'.pdf',sep="")
-
-	#pdf(filename)
-	#plot(indexes, x, xlab="Judgement index",ylab="Judgement duration, seconds", xlim=c(1,max(c(UNITS_AMOUNT,nrow(data)))))
 
 	i <-1
 
@@ -45,10 +41,6 @@ if (data != FALSE && nrow(data)>=5){
 	current_prediction <- (max(c(UNITS_AMOUNT,nrow(data)))*current_slope)+hypothesis1.lm$coefficients['(Intercept)']
 	current_prediction <- round(current_prediction)
 	print(current_prediction)
-
-	#abline(hypothesis1.lm, col=alpha('grey', 0.5))
-	#abline(current_prediction,0, col=alpha('blue', 0.5))
-	#dev.off()
 	
 	completed <- nrow(data)
 }else{
@@ -60,9 +52,4 @@ fileConn<-file(paste("Datasets/Limits/",JOB_ID,".json", sep=""))
 json <- paste('{"job_id":',JOB_ID,', "limit":',current_prediction,', "completed":',completed,'}', sep='')
 writeLines(c(json), fileConn)
 close(fileConn)
-
-#m <- mongo.create(host=host , db=db, username=username, password=password)
-#ns <- "admin.collection"
-#bson <- mongo.bson.from.JSON(json)
-#mongo.insert(m, ns, bson)
 
