@@ -14,7 +14,7 @@ resetRoute.get(function(request, response) {
 
 var CrowdFlower = require('../crowdflower');
 var ReLauncher = require('../relauncher');
-
+var Unit = require('../unit');
 
 var parseUrlencoded = bodyParser.json();
 // =====================================================
@@ -52,9 +52,31 @@ router.route('/:id/launch')
     .post(parseUrlencoded, function(request, response) {
         var launcher = new ReLauncher(request.body.api_key, request.params.id)
         launcher.launchRocket(function() {
-            response.json('the rocket is launched');
+            response.json('the application is launched for the job: '+request.params.id);
         });
 
     });
+router.route('/:id/monitor_relaunched_chains')
+    .post(parseUrlencoded, function(request, response) {
+        var launcher = new ReLauncher(request.body.api_key, request.params.id)
+        launcher.initTimer(function() {
+            response.json('relaunched_chains are monitored');
+        });
+    });
 
+router.route('/:job_id/units/:unit_id/relaunch')
+    .post(parseUrlencoded, function(request, response) {
+        var launcher = new ReLauncher(request.body.api_key, request.params.job_id)
+        var the_unit = new Unit(launcher,request.params.unit_id)
+        the_unit.getDetail(function(the_unit){
+            
+            if (the_unit.info.state == "judging"){
+                the_unit.relaunchUnit();
+                response.json('the unit is relaunching...');
+            }else{
+                response.json('the unit has status '+the_unit.info.state);
+            }
+            
+        });
+    });
 module.exports = router;
